@@ -12,9 +12,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
+
+    ArrayList<String> celebsURLs = new ArrayList<String>();
+    ArrayList<String> celebsName = new ArrayList<String>();
+    int chooseCelebs = 0;
 
     public class DownloadTask extends AsyncTask<String, Void, String>{
 
@@ -60,7 +67,20 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             result = task.execute("http://www.posh24.se/kandisar").get();
-            Log.i("Content of URL: ", result);
+            String[] splitResult = result.split("<div class=\"sidebarContainer\">");
+
+            Pattern p = Pattern.compile("src=\"(.*?)\"");
+            Matcher m = p.matcher(splitResult[0]);
+
+            while(m.find()){
+                celebsURLs.add(m.group(1));
+            }
+
+            Pattern p1 = Pattern.compile("alt=\"(.*?)\"");
+            Matcher m1 = p.matcher(splitResult[0]);
+            while (m1.find()){
+                celebsName.add(m1.group(1));
+            }
 
         } catch (InterruptedException e) {
             e.printStackTrace();
