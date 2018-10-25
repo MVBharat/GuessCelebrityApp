@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import java.io.IOException;
@@ -26,7 +27,11 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> celebsName = new ArrayList<String>();
     int chooseCelebs = 0;
 
+    int locationOfCorrectAns = 0;
+    String[] answer = new String [4];
+
     ImageView imageView;
+    Button button0, button1, button2, button3;
 
     public class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
 
@@ -96,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         imageView = (ImageView)findViewById(R.id.imageView);
+        button0 = (Button)findViewById(R.id.button0);
+        button1 = (Button)findViewById(R.id.button1);
+        button2 = (Button)findViewById(R.id.button2);
+        button3 = (Button)findViewById(R.id.button3);
 
         DownloadTask task = new DownloadTask();
         String result = null;
@@ -105,17 +114,18 @@ public class MainActivity extends AppCompatActivity {
             result = task.execute("http://www.posh24.se/kandisar").get();
             String[] splitResult = result.split("<div class=\"sidebarContainer\">");
 
-            Pattern p = Pattern.compile("src=\"(.*?)\"");
+            Pattern p = Pattern.compile("<img src=\"(.*?)\"");
             Matcher m = p.matcher(splitResult[0]);
 
             while(m.find()){
                 celebsURLs.add(m.group(1));
             }
 
-            Pattern p1 = Pattern.compile("alt=\"(.*?)\"");
-            Matcher m1 = p.matcher(splitResult[0]);
-            while (m1.find()){
-                celebsName.add(m1.group(1));
+            p = Pattern.compile("alt=\"(.*?)\"");
+            m = p.matcher(splitResult[0]);
+            while (m.find()){
+                celebsName.add(m.group(1));
+
             }
 
             Random random = new Random();
@@ -127,6 +137,31 @@ public class MainActivity extends AppCompatActivity {
             celebImage = imageTask.execute(celebsURLs.get(chooseCelebs)).get();
 
             imageView.setImageBitmap(celebImage);
+
+            locationOfCorrectAns= random.nextInt(4);
+            int inCorrectLocation;
+            for(int i= 0 ; i<4 ; i++){
+                if(i==locationOfCorrectAns){
+
+                    answer[i] = celebsName.get(chooseCelebs);
+
+                }else
+                {
+                    inCorrectLocation = random.nextInt(celebsURLs.size());
+
+                    while (inCorrectLocation==chooseCelebs){
+
+                        inCorrectLocation = random.nextInt(celebsURLs.size());
+
+                    }
+                    answer[i] = celebsName.get(inCorrectLocation);
+                }
+            }
+
+            button0.setText(answer[0]);
+            button1.setText(answer[1]);
+            button2.setText(answer[2]);
+            button3.setText(answer[3]);
 
         } catch (InterruptedException e) {
             e.printStackTrace();
