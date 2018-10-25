@@ -6,8 +6,10 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,19 @@ public class MainActivity extends AppCompatActivity {
 
     ImageView imageView;
     Button button0, button1, button2, button3;
+
+    public void celebChoosen(View view){
+
+        if(view.getTag().equals(Integer.toString(locationOfCorrectAns))){
+
+            Toast.makeText(getApplicationContext(), "Correct!", Toast.LENGTH_SHORT).show();
+        }else
+        {
+            Toast.makeText(getApplicationContext(), "Wrong! It was " + celebsName.get(chooseCelebs), Toast.LENGTH_SHORT).show();
+        }
+
+        creatNewQuestion();
+    }
 
     public class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
 
@@ -59,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-
-
 
     public class DownloadTask extends AsyncTask<String, Void, String>{
 
@@ -93,6 +106,52 @@ public class MainActivity extends AppCompatActivity {
 
             return null;
         }
+    }
+
+    private void creatNewQuestion() {
+        Random random = new Random();
+        chooseCelebs = random.nextInt(celebsURLs.size());
+
+        ImageDownloader imageTask = new ImageDownloader();
+        Bitmap celebImage;
+
+        try {
+
+            celebImage = imageTask.execute(celebsURLs.get(chooseCelebs)).get();
+
+
+            imageView.setImageBitmap(celebImage);
+
+            locationOfCorrectAns= random.nextInt(4);
+            int inCorrectLocation;
+            for(int i= 0 ; i<4 ; i++){
+                if(i==locationOfCorrectAns){
+
+                    answer[i] = celebsName.get(chooseCelebs);
+
+                }else
+                {
+                    inCorrectLocation = random.nextInt(celebsURLs.size());
+
+                    while (inCorrectLocation==chooseCelebs){
+
+                        inCorrectLocation = random.nextInt(celebsURLs.size());
+
+                    }
+                    answer[i] = celebsName.get(inCorrectLocation);
+                }
+            }
+
+            button0.setText(answer[0]);
+            button1.setText(answer[1]);
+            button2.setText(answer[2]);
+            button3.setText(answer[3]);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -128,41 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-            Random random = new Random();
-            chooseCelebs = random.nextInt(celebsURLs.size());
-
-            ImageDownloader imageTask = new ImageDownloader();
-            Bitmap celebImage;
-
-            celebImage = imageTask.execute(celebsURLs.get(chooseCelebs)).get();
-
-            imageView.setImageBitmap(celebImage);
-
-            locationOfCorrectAns= random.nextInt(4);
-            int inCorrectLocation;
-            for(int i= 0 ; i<4 ; i++){
-                if(i==locationOfCorrectAns){
-
-                    answer[i] = celebsName.get(chooseCelebs);
-
-                }else
-                {
-                    inCorrectLocation = random.nextInt(celebsURLs.size());
-
-                    while (inCorrectLocation==chooseCelebs){
-
-                        inCorrectLocation = random.nextInt(celebsURLs.size());
-
-                    }
-                    answer[i] = celebsName.get(inCorrectLocation);
-                }
-            }
-
-            button0.setText(answer[0]);
-            button1.setText(answer[1]);
-            button2.setText(answer[2]);
-            button3.setText(answer[3]);
-
+            creatNewQuestion();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -170,5 +195,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+
 
 }
